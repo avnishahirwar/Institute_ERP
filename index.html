@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise AI Campus ERP & SaaS Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+
+    <header class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center px-8 sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-crown text-amber-400 text-3xl"></i>
+            <span class="text-2xl font-black tracking-wider text-white">Global ERP <span class="text-indigo-500">SaaS Engine</span></span>
+        </div>
+        <div>
+            <span class="text-xs bg-indigo-900 text-indigo-300 font-bold px-3 py-1 rounded-full border border-indigo-500">● Local Live Engine</span>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6">
+        <section id="sec-login" class="max-w-md mx-auto bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl space-y-6 my-12">
+            <h2 class="text-2xl font-bold text-center text-white">🔐 Universal ERP Login</h2>
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">ईमेल एड्रेस</label>
+                    <input type="email" id="login-email" value="principal@sch101.com" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">पासवर्ड</label>
+                    <input type="password" id="login-password" value="admin123" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-lg text-white">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 font-bold py-3 rounded-lg text-white transition">
+                    लॉगिन करें (Access Portal)
+                </button>
+            </form>
+            <div id="login-msg" class="text-center text-sm font-semibold"></div>
+        </section>
+
+        <section id="sec-dashboards" class="hidden space-y-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <div>
+                    <h2 id="dash-title" class="text-3xl font-black text-indigo-400">डैशबोर्ड</h2>
+                    <p id="dash-sub" class="text-slate-400">आपका नियंत्रण केंद्र</p>
+                </div>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold">
+                    लॉगआउट 🚪
+                </button>
+            </div>
+            <div id="dashboard-content" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+    </main>
+
+    <script>
+        const API = "/api/v5";
+
+        document.getElementById('form-login').onsubmit = async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('login-msg');
+            msg.innerText = "प्रमाणित किया जा रहा है...";
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: document.getElementById('login-email').value,
+                        password: document.getElementById('login-password').value
+                    })
+                });
+                const data = await res.json();
+
+                if(res.ok) {
+                    localStorage.setItem('token', data.token);
+                    renderPortal(data);
+                } else {
+                    msg.className = "text-center text-sm font-semibold text-red-400";
+                    msg.innerText = `❌ ${data.detail}`;
+                }
+            } catch(e) {
+                msg.innerText = "❌ सर्वर कनेक्शन एरर!";
+            }
+        };
+
+        async function renderPortal(userData) {
+            document.getElementById('sec-login').classList.add('hidden');
+            document.getElementById('sec-dashboards').classList.remove('hidden');
+
+            const content = document.getElementById('dashboard-content');
+            document.getElementById('dash-title').innerText = `${userData.role} Portal`;
+            document.getElementById('dash-sub').innerText = `संस्थान: ${userData.institution_name} | यूज़र: ${userData.full_name}`;
+
+            try {
+                const res = await fetch(`${API}/dashboard/principal`, {
+                    headers: { 'token': localStorage.getItem('token') }
+                });
+                const result = await res.json();
+
+                content.innerHTML = `
+                    <div class="bg-slate-800 p-6 rounded-xl border border-indigo-500/30">
+                        <h4 class="text-slate-400 text-sm font-bold">संस्थान स्टेटस</h4>
+                        <p class="text-2xl font-bold text-emerald-400 mt-2">Active Enterprise</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-xl border border-indigo-500/30 col-span-2">
+                        <h4 class="text-slate-400 text-sm font-bold">लाइव डैशबोर्ड डेटा</h4>
+                        <pre class="text-sm text-amber-300 mt-2 bg-slate-900 p-4 rounded-lg">${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+            } catch(e) {
+                content.innerHTML = `<div class="text-red-400">डेटा लोड करने में असमर्थ।</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+    </script>
+</body>
+</html>

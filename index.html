@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise ERP Dashboard</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <title>Universal School/College ERP Portal</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
@@ -12,7 +12,7 @@
     <!-- Top Navigation Bar -->
     <header class="bg-indigo-600 text-white shadow-md p-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold">🏫 School/College ERP Portal</h1>
-        <span class="bg-green-500 text-xs px-3 py-1 rounded-full font-semibold">● Server Connected</span>
+        <span class="bg-green-500 text-xs px-3 py-1 rounded-full font-semibold">● Cloud Live Connected</span>
     </header>
 
     <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -27,11 +27,11 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">पूरा नाम (Full Name)</label>
-                    <input type="text" id="full_name" placeholder="उदा. राहुल शर्मा" required class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-400">
+                    <input type="text" id="full_name" placeholder="उदा. AVNISH KUMAR" required class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">ईमेल (Email)</label>
-                    <input type="email" id="email" placeholder="rahul@example.com" required class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-400">
+                    <input type="email" id="email" placeholder="avnish@gmail.com" required class="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -66,7 +66,7 @@
                 <table class="w-full text-left text-sm border-collapse">
                     <thead>
                         <tr class="bg-gray-100 border-b">
-                            <th class="p-2">User ID</th>
+                            <th class="p-2">ID</th>
                             <th class="p-2">नाम</th>
                             <th class="p-2">रोल</th>
                             <th class="p-2">ईमेल</th>
@@ -74,7 +74,7 @@
                     </thead>
                     <tbody id="usersTableBody">
                         <tr>
-                            <td colspan="4" class="p-4 text-center text-gray-400">कोई डेटा लोड नहीं हुआ है। रिफ्रेश बटन दबाएं।</td>
+                            <td colspan="4" class="p-4 text-center text-gray-400">डेटा लोड हो रहा है...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -83,11 +83,11 @@
 
     </div>
 
-    <!-- JavaScript code to communicate with FastAPI -->
     <script>
-        const API_BASE = "http://127.0.0.1:8000/api/v2";
+        // Automatic Relative API Path (Works on both Localhost & Render Live Cloud)
+        const API_BASE = "/api/v3";
 
-        // Handle Registration Form Submit
+        // Register User Form Submit
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const responseDiv = document.getElementById('regResponse');
@@ -99,8 +99,7 @@
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
                 role: document.getElementById('role').value,
-                department_or_class: "Class 10",
-                designation: "Member"
+                class_name: "Class 10"
             };
 
             try {
@@ -113,8 +112,8 @@
                 
                 if (res.ok) {
                     responseDiv.className = "mt-4 text-sm font-semibold text-green-600";
-                    responseDiv.innerText = `✅ सफलतापूर्वक जुड़ गए! User ID: ${data.user_id}`;
-                    fetchUsers(); // Auto refresh list
+                    responseDiv.innerText = `✅ सफलतापूर्वक जुड़ गए! ID: ${data.data.id}`;
+                    fetchUsers(); // Refresh Table
                 } else {
                     responseDiv.className = "mt-4 text-sm font-semibold text-red-600";
                     responseDiv.innerText = `❌ एरर: ${data.detail || 'कुछ गड़बड़ हुई'}`;
@@ -135,7 +134,7 @@
                 if (data.users && data.users.length > 0) {
                     tableBody.innerHTML = data.users.map(u => `
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="p-2 font-bold text-indigo-600">${u.user_id}</td>
+                            <td class="p-2 font-bold text-indigo-600">${u.id}</td>
                             <td class="p-2">${u.full_name}</td>
                             <td class="p-2"><span class="bg-gray-200 text-xs px-2 py-1 rounded">${u.role}</span></td>
                             <td class="p-2 text-gray-500">${u.email}</td>
@@ -149,7 +148,7 @@
             }
         }
 
-        // Auto load users on page load
+        // Auto Load Table
         fetchUsers();
     </script>
 </body>
